@@ -1,0 +1,61 @@
+{
+  "target_sparsity": 0.95,
+  "num_seeds": 5,
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "taylor_mean": 93.64902506963787,
+  "taylor_std": 1.3843758930127212,
+  "magnitude_mean": 93.03621169916434,
+  "magnitude_std": 2.1213852662573567,
+  "mean_difference": 0.6128133704735319,
+  "t_statistic": 0.7857142857142929,
+  "p_value": 0.47596560548881095,
+  "statistically_significant_p05": false,
+  "seed_details": [
+    {
+      "seed": 42,
+      "taylor_accuracy": 94.42896935933148,
+      "magnitude_accuracy": 92.75766016713092,
+      "difference": 1.6713091922005532,
+      "achieved_sparsity_taylor": 0.9499535891089109,
+      "achieved_sparsity_magnitude": 0.9499535891089109
+    },
+    {
+      "seed": 43,
+      "taylor_accuracy": 94.70752089136491,
+      "magnitude_accuracy": 92.47910863509749,
+      "difference": 2.2284122562674185,
+      "achieved_sparsity_taylor": 0.9499535891089109,
+      "achieved_sparsity_magnitude": 0.9499535891089109
+    },
+    {
+      "seed": 44,
+      "taylor_accuracy": 94.70752089136491,
+      "magnitude_accuracy": 95.54317548746518,
+      "difference": -0.8356545961002695,
+      "achieved_sparsity_taylor": 0.9499535891089109,
+      "achieved_sparsity_magnitude": 0.9499535891089109
+    },
+    {
+      "seed": 45,
+      "taylor_accuracy": 91.64345403899722,
+      "magnitude_accuracy": 89.97214484679665,
+      "difference": 1.6713091922005674,
+      "achieved_sparsity_taylor": 0.9499535891089109,
+      "achieved_sparsity_magnitude": 0.9499535891089109
+    },
+    {
+      "seed": 46,
+      "taylor_accuracy": 92.75766016713092,
+      "magnitude_accuracy": 94.42896935933148,
+      "difference": -1.6713091922005532,
+      "achieved_sparsity_taylor": 0.9499535891089109,
+      "achieved_sparsity_magnitude": 0.9499535891089109
+    }
+  ]
+}
