@@ -24,17 +24,30 @@ def main():
 
     in_dim, out_dim = 256, 256
     batch_size = 64
-    layer = MaskedLinear(in_features=in_dim, out_features=out_dim)
+    total_weights = in_dim * out_dim
+
+    # Base layer for consistent weight distribution across sparsity evaluations
+    base_layer = MaskedLinear(in_features=in_dim, out_features=out_dim)
+    initial_w = base_layer.weight.data.copy()
 
     sparsities = [0.0, 0.50, 0.70, 0.80, 0.85, 0.90, 0.95, 0.98]
     benchmarks = []
 
     print("\n=== Real Cost & Latency Benchmark across Sparsity Levels ===")
-    print(f"Layer: ({in_dim} x {out_dim}) | Total Weights: {in_dim*out_dim:,} | Batch Size: {batch_size}\n")
+    print(f"Layer: ({in_dim} x {out_dim}) | Total Weights: {total_weights:,} | Batch Size: {batch_size}\n")
 
     for s in sparsities:
-        # Create mask
-        mask = (np.random.rand(in_dim, out_dim) >= s).astype(np.float32)
+        # Create fresh layer with clean dense weights to prevent compounding zeros
+        layer = MaskedLinear(in_features=in_dim, out_features=out_dim)
+        layer.weight.data = initial_w.copy()
+
+        # Construct exact binary mask with exact connection count
+        num_pruned = int(round(s * total_weights))
+        mask_flat = np.ones(total_weights, dtype=np.float32)
+        if num_pruned > 0:
+            perm = np.random.permutation(total_weights)
+            mask_flat[perm[:num_pruned]] = 0.0
+        mask = mask_flat.reshape(in_dim, out_dim)
         layer.set_mask(mask)
 
         bench = benchmark_layer_inference(layer, batch_size=batch_size, num_runs=300)
@@ -46,15 +59,18 @@ def main():
         csr_mem_kb = (sparse_layer.csr_weight.data.nbytes + sparse_layer.csr_weight.indices.nbytes + sparse_layer.csr_weight.indptr.nbytes) / 1024.0
 
         bench["target_sparsity"] = s
+        bench["achieved_sparsity"] = bench["sparsity"]
         bench["dense_mem_kb"] = dense_mem_kb
         bench["csr_mem_kb"] = csr_mem_kb
         benchmarks.append(bench)
 
         print(
-            f"Sparsity: {bench['sparsity']*100:4.1f}% | Active Params: {bench['active_params']:6,d} | "
+            f"Target: {s*100:4.1f}% | Achieved: {bench['sparsity']*100:4.1f}% | "
+            f"Active Params: {bench['active_params']:6,d} / {total_weights:,} | "
             f"Active FLOPs: {bench['sparse_flops']:7,d} ({bench['theoretical_speedup']:4.1f}x) | "
             f"CSR Latency: {bench['sparse_csr_latency_ms']:.4f}ms vs Dense: {bench['dense_latency_ms']:.4f}ms | "
-            f"Dense*0 Shortcut: {bench['dense_masked_latency_ms']:.4f}ms"
+            f"Dense*0 Shortcut: {bench['dense_masked_latency_ms']:.4f}ms | "
+            f"Speedup vs Dense: {bench['measured_speedup_vs_dense']:.2f}x"
         )
 
     # Save to artifacts

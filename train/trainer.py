@@ -44,9 +44,10 @@ class Trainer:
         # Reverse-mode autodiff backward pass
         loss.backward()
 
-        # Capture virtual sensitivity gradients before optimizer step
+        # Capture virtual sensitivity gradients and compute importance scores before optimizer step
         if self.pruner is not None:
             self.pruner.capture_shadow_gradients()
+            self.pruner.compute_importance_scores()
 
         # Optimizer update (with honest mask invariant enforcement)
         self.optimizer.step()

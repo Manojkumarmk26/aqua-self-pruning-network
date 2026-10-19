@@ -31,6 +31,7 @@ class Pruner:
         self.criterion = criterion
         self.allow_regrowth = allow_regrowth
         self.regrowth_ratio = regrowth_ratio
+        self.cached_scores: dict[int, np.ndarray] = {}
 
         # Discover all MaskedLinear layers in model
         self.layers: List[MaskedLinear] = []
@@ -58,6 +59,14 @@ class Pruner:
         for layer in self.layers:
             layer.capture_shadow_grad()
 
+    def compute_importance_scores(self):
+        """
+        Evaluate importance criteria on all layers prior to optimizer step.
+        Ensures weights W_t and gradients g_t correspond to the exact same backward timestep.
+        """
+        for layer in self.layers:
+            self.cached_scores[id(layer)] = self.criterion.compute_scores(layer)
+
     def step(self, global_step: int, optimizer: Optional[Optimizer] = None) -> bool:
         """
         Execute pruning step if scheduled.
@@ -70,7 +79,11 @@ class Pruner:
 
         for layer in self.layers:
             old_mask = layer.mask.copy()
-            scores = self.criterion.compute_scores(layer)
+            layer_id = id(layer)
+            if layer_id in self.cached_scores:
+                scores = self.cached_scores.pop(layer_id)
+            else:
+                scores = self.criterion.compute_scores(layer)
             total = scores.size
             num_pruned_target = int(np.round(total * target_sparsity))
             num_active_target = total - num_pruned_target

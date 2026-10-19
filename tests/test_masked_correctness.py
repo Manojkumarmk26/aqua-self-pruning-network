@@ -198,6 +198,131 @@ class TestMaskedCorrectness(unittest.TestCase):
         self.assertEqual(v[0, 1], 0.0)
         self.assertEqual(layer.weight.data[0, 1], 0.0)
 
+    def test_partially_masked_matrix_zero_weight_grad_and_accurate_shadow_grad(self):
+        """
+        Verify that in a partially masked weight matrix:
+        1. All masked connections have weight.grad == 0.0 strictly.
+        2. All active connections have non-zero weight.grad.
+        3. layer.capture_shadow_grad() captures the true unmasked virtual sensitivity dL/dW_eff,
+           which numerically matches finite-difference sensitivity for BOTH active and masked connections.
+        """
+        layer = MaskedLinear(in_features=4, out_features=4, bias=True)
+        # 50% sparsity mask across rows and columns
+        mask = np.array([
+            [1.0, 0.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0, 1.0],
+            [1.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 1.0]
+        ], dtype=np.float32)
+        layer.set_mask(mask)
+
+        x = np.random.randn(3, 4).astype(np.float32)
+        targets = np.array([0, 2, 1], dtype=np.int64)
+
+        logits = layer(Tensor(x))
+        loss = ops.softmax_cross_entropy(logits, targets)
+        loss.backward()
+        layer.capture_shadow_grad()
+
+        # 1. Check weight.grad strictly zero for all masked entries
+        masked_idx = np.where(mask == 0.0)
+        active_idx = np.where(mask == 1.0)
+        
+        self.assertTrue(np.all(layer.weight.grad[masked_idx] == 0.0))
+        self.assertTrue(np.all(layer.weight.grad[active_idx] != 0.0))
+
+        # 2. Check shadow_grad is present and active entries match weight.grad
+        self.assertIsNotNone(layer.shadow_grad)
+        np.testing.assert_allclose(layer.shadow_grad[active_idx], layer.weight.grad[active_idx], atol=1e-6)
+
+        # 3. Finite-difference numerical gradient check of shadow sensitivity w.r.t W_eff
+        eps = 1e-5
+        numerical_shadow_grad = np.zeros_like(layer.weight.data)
+        base_w_eff = layer.weight.data * layer.mask
+
+        for i in range(4):
+            for j in range(4):
+                # Perturb effective weight entry (i, j)
+                w_plus = base_w_eff.copy()
+                w_plus[i, j] += eps
+                out_p = x @ w_plus + layer.bias.data
+                loss_p = ops.softmax_cross_entropy(Tensor(out_p), targets).item()
+
+                w_minus = base_w_eff.copy()
+                w_minus[i, j] -= eps
+                out_m = x @ w_minus + layer.bias.data
+                loss_m = ops.softmax_cross_entropy(Tensor(out_m), targets).item()
+
+                numerical_shadow_grad[i, j] = (loss_p - loss_m) / (2.0 * eps)
+
+        # Verify shadow_grad matches numerical virtual sensitivity for ALL entries (active AND masked)
+        np.testing.assert_allclose(layer.shadow_grad, numerical_shadow_grad, rtol=1e-3, atol=1e-4)
+
+    def test_shadow_grad_directs_regrowth_across_pruning_cycles(self):
+        """
+        Verify that shadow gradients correctly identify the highest-sensitivity pruned connection
+        for regrowth after multiple pruning updates and training steps.
+        """
+        layer = MaskedLinear(in_features=3, out_features=3, bias=False)
+        optimizer = Adam(layer.parameters(), lr=1e-2)
+        
+        # Step 1: Train 5 steps
+        for _ in range(5):
+            optimizer.zero_grad()
+            x = np.random.randn(4, 3).astype(np.float32)
+            targets = np.array([0, 1, 2, 0], dtype=np.int64)
+            loss = ops.softmax_cross_entropy(layer(Tensor(x)), targets)
+            loss.backward()
+            layer.capture_shadow_grad()
+            optimizer.step()
+
+        # Step 2: Prune 2 connections
+        old_mask = np.ones((3, 3), dtype=np.float32)
+        new_mask = old_mask.copy()
+        new_mask[0, 1] = 0.0
+        new_mask[2, 0] = 0.0
+        layer.set_mask(new_mask)
+
+        # Step 3: Train 10 steps with masked connections
+        for _ in range(10):
+            optimizer.zero_grad()
+            x = np.random.randn(4, 3).astype(np.float32)
+            targets = np.array([0, 1, 2, 0], dtype=np.int64)
+            loss = ops.softmax_cross_entropy(layer(Tensor(x)), targets)
+            loss.backward()
+            layer.capture_shadow_grad()
+            optimizer.step()
+
+        # Verify masked weights remain 0
+        self.assertEqual(layer.weight.data[0, 1], 0.0)
+        self.assertEqual(layer.weight.data[2, 0], 0.0)
+        # Verify shadow gradients are non-zero for masked weights
+        self.assertNotEqual(layer.shadow_grad[0, 1], 0.0)
+        self.assertNotEqual(layer.shadow_grad[2, 0], 0.0)
+
+        # Regrowth decision: identify which pruned connection has higher sensitivity
+        sens_01 = abs(layer.shadow_grad[0, 1])
+        sens_20 = abs(layer.shadow_grad[2, 0])
+        best_revive = (0, 1) if sens_01 > sens_20 else (2, 0)
+
+        # Regrow the best connection
+        revived_mask = new_mask.copy()
+        revived_mask[best_revive] = 1.0
+        optimizer.clean_revived_state(layer.weight, new_mask, revived_mask)
+        layer.set_mask(revived_mask)
+
+        # Train 5 steps post-revival: ensure stability and learning
+        for _ in range(5):
+            optimizer.zero_grad()
+            x = np.random.randn(4, 3).astype(np.float32)
+            targets = np.array([0, 1, 2, 0], dtype=np.int64)
+            loss = ops.softmax_cross_entropy(layer(Tensor(x)), targets)
+            loss.backward()
+            optimizer.step()
+
+        self.assertFalse(np.isnan(layer.weight.data).any())
+        self.assertNotEqual(layer.weight.data[best_revive], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()

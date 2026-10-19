@@ -49,6 +49,55 @@ class TestPruning(unittest.TestCase):
         self.assertEqual(flops["sparse_flops"], 2000)
         self.assertAlmostEqual(flops["theoretical_speedup"], 10.0)
 
+    def test_exact_multi_layer_achieved_sparsity(self):
+        """Verify exact per-layer and global achieved sparsity across multiple layers."""
+        import nn
+        from prune.pruner import Pruner
+        from prune.scheduler import OneShotScheduler
+
+        model = nn.Sequential(
+            MaskedLinear(in_features=20, out_features=30, name="fc1"),
+            nn.ReLU(),
+            MaskedLinear(in_features=30, out_features=10, name="fc2")
+        )
+        # Total weights: 20*30 + 30*10 = 600 + 300 = 900
+        target_s = 0.80
+        sched = OneShotScheduler(target_sparsity=target_s, prune_step=1)
+        pruner = Pruner(model, sched, MagnitudeCriterion())
+
+        pruned = pruner.step(global_step=1)
+        self.assertTrue(pruned)
+
+        # Layer 1: 600 weights -> 80% pruned = 480 pruned, 120 active
+        self.assertEqual(pruner.layers[0].num_active_params, 120)
+        self.assertAlmostEqual(pruner.layers[0].sparsity, 0.80, places=4)
+
+        # Layer 2: 300 weights -> 80% pruned = 240 pruned, 60 active
+        self.assertEqual(pruner.layers[1].num_active_params, 60)
+        self.assertAlmostEqual(pruner.layers[1].sparsity, 0.80, places=4)
+
+        # Global sparsity: (120 + 60) / 900 = 180 / 900 = 0.20 active -> 0.80 sparsity
+        self.assertAlmostEqual(pruner.current_sparsity, 0.80, places=4)
+
+    def test_pruner_score_caching_ordering(self):
+        """Verify importance score caching cleanly caches and consumes scores before optimizer step."""
+        import nn
+        from prune.pruner import Pruner
+        from prune.scheduler import OneShotScheduler
+
+        model = nn.Sequential(MaskedLinear(in_features=5, out_features=5, name="fc1"))
+        sched = OneShotScheduler(target_sparsity=0.60, prune_step=1)
+        pruner = Pruner(model, sched, MagnitudeCriterion())
+
+        # Precompute scores
+        pruner.compute_importance_scores()
+        self.assertIn(id(pruner.layers[0]), pruner.cached_scores)
+
+        # Step consumes cached scores
+        pruner.step(global_step=1)
+        self.assertNotIn(id(pruner.layers[0]), pruner.cached_scores)
+        self.assertEqual(pruner.layers[0].num_active_params, 10)  # 25 * 0.4 = 10 active
+
 
 if __name__ == "__main__":
     unittest.main()

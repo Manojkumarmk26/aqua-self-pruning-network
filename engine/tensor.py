@@ -134,6 +134,12 @@ class Tensor:
 
         build_topo(self)
 
+        # Clear intermediate node gradients from prior backward passes to prevent
+        # stale accumulation into non-leaf computation nodes across repeated backward calls.
+        for node in topo:
+            if node is not self and node.creator is not None:
+                node.grad = None
+
         # Backpropagate in reverse topological order
         for node in reversed(topo):
             if node.creator is None or node.grad is None:

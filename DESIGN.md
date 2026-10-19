@@ -160,7 +160,7 @@ If $\hat{v}$ decayed to $0$, the step becomes $\frac{\hat{m}}{\epsilon} = \frac{
 **An explosive numerical spike occurs immediately after revival, injecting NaNs or destabilizing the layer's representations.**
 
 ### 3.3 Our Rigorous Solution: Mask-Aware Optimizer Dynamics
-Our implementation in [`optim/adam.py`](file:///d:/myproject/Task/optim/adam.py) and [`optim/sgd.py`](file:///d:/myproject/Task/optim/sgd.py) implements three strict guarantees:
+Our implementation in [`optim/adam.py`](optim/adam.py) and [`optim/sgd.py`](optim/sgd.py) implements three strict guarantees:
 1. **Parameter Clamping:** At the end of every optimization step, masked weights are explicitly clamped:
    $$W_{ij} \cdot M_{ij} = 0.0$$
 2. **Optimizer Moment Sanitization:** Optimizer state moments ($m, v$, velocity) for masked entries are cleared to zero ($m[M==0] = 0, v[M==0] = 0$), preventing phantom decay.
@@ -168,7 +168,7 @@ Our implementation in [`optim/adam.py`](file:///d:/myproject/Task/optim/adam.py)
    $$v_{\text{revived}} = \frac{1}{|M_{\text{active}}|} \sum_{kl \in M_{\text{active}}} v_{kl}$$
    This matches the scaling of the surrounding active parameters, completely eliminating division-by-epsilon gradient spikes!
 
-This behavior is proven by 6 automated tests in [`tests/test_masked_correctness.py`](file:///d:/myproject/Task/tests/test_masked_correctness.py).
+This behavior is proven by 8 automated tests in [`tests/test_masked_correctness.py`](tests/test_masked_correctness.py), including finite-difference validation of virtual shadow gradients on partially masked matrices.
 
 ---
 
@@ -221,10 +221,10 @@ Phase 3: Hardware-Accelerated Sparse Kernels (AQUA Serving Engine, 20x - 50x)
 ### 5.1 The Harsh Reality: Dense-Times-Zero is NOT Sparse Serving
 Multiplying a dense matrix filled with zeros (`x @ (W * 0)`) executes the exact same number of floating-point operations ($2 \times B \times M \times N$) and transfers the exact same number of bytes across memory buses as an unpruned model. **It yields 0.0% inference speedup.**
 
-As proven by our empirical benchmarks in [`artifacts/cost_benchmark.json`](file:///d:/myproject/Task/artifacts/cost_benchmark.json):
-- Dense GEMM Latency: **0.381 ms**
-- Dense-Times-Zero Shortcut: **0.251 ms - 0.364 ms** (Zero speedup!)
-- True Sparse CSR Forward Pass at 97% Sparsity: **0.084 ms (3.57x real speedup!)**
+As proven by our empirical benchmarks in [`artifacts/cost_benchmark.json`](artifacts/cost_benchmark.json):
+- Dense GEMM Baseline: **0.272 ms** (At 0% sparsity, dense BLAS is faster than CSR due to contiguous memory access)
+- Dense-Times-Zero Shortcut: **0.258 ms - 0.757 ms** (Zero speedup!)
+- True Sparse CSR Forward Pass at 98% Sparsity: **0.082 ms (3.26x real wall-clock speedup!)**
 
 ### 5.2 Multi-Tenant Serving Architecture on AQUA
 AQUA serves thousands of customer agent workflows concurrently. Serving self-pruned networks at scale requires solving three production bottlenecks:

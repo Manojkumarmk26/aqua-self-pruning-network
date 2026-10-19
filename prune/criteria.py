@@ -46,13 +46,14 @@ class TaylorSaliencyCriterion(ImportanceCriterion):
 
     def compute_scores(self, layer: MaskedLinear) -> np.ndarray:
         w = layer.weight.data
-        # If weight.grad is available, use it; if weight was masked, use shadow_grad if available
-        g = layer.weight.grad
-        if g is None or np.all(g == 0):
-            if layer.shadow_grad is not None:
-                g = layer.shadow_grad
-            else:
-                g = np.zeros_like(w)
+        # Use shadow gradient when available (contains unmasked virtual sensitivity dL/dW_eff)
+        # For active weights, shadow_grad matches weight.grad identically.
+        if layer.shadow_grad is not None:
+            g = layer.shadow_grad
+        elif layer.weight.grad is not None:
+            g = layer.weight.grad
+        else:
+            g = np.zeros_like(w)
 
         instant_score = np.abs(w * g)
         layer_id = id(layer)
