@@ -130,7 +130,7 @@ page = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.markdown("**Environment:** Pure Python + NumPy")
 st.sidebar.markdown("**Autodiff Engine:** Reverse-mode DAG")
-st.sidebar.markdown("**Status:** <span class='badge badge-success'>29/29 Tests Passed</span>", unsafe_allow_html=True)
+st.sidebar.markdown("**Status:** <span class='badge badge-success'>36/36 Tests Passed</span>", unsafe_allow_html=True)
 
 
 # ==============================================================================
