@@ -1,0 +1,10 @@
+# Core permitted libraries per AQUA challenge guidelines:
+# Scikit-learn is permitted ONLY to load standard datasets (MNIST / Digits).
+# The autodiff engine, backward pass, pruning mechanism, optimizer, and training loop
+# are implemented from scratch in pure Python and NumPy.
+
+numpy>=1.24.0
+scipy>=1.10.0
+scikit-learn>=1.2.0
+matplotlib>=3.7.0
+pytest>=7.0.0
