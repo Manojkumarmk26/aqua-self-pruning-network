@@ -12,10 +12,10 @@
     "dense_flops": 2097152,
     "sparse_flops": 209664,
     "theoretical_speedup": 10.002442002442002,
-    "dense_latency_ms": 0.07066149963065982,
-    "dense_masked_latency_ms": 0.07120300084352493,
-    "sparse_csr_latency_ms": 0.06609399802982807,
-    "measured_speedup_vs_dense": 1.0691061478649007
+    "dense_latency_ms": 0.07067249855026603,
+    "dense_masked_latency_ms": 0.06933199940249324,
+    "sparse_csr_latency_ms": 0.06861699977889657,
+    "measured_speedup_vs_dense": 1.0299561155106294
   },
   "history": {
     "epoch": [

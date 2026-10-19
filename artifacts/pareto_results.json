@@ -11,7 +11,7 @@
     "theoretical_speedup": 1.0,
     "dense_flops": 2097152,
     "sparse_flops": 2097152,
-    "sparse_csr_latency_ms": 0.2065749978646636,
+    "sparse_csr_latency_ms": 0.20376200322061777,
     "method_name": "Taylor Saliency"
   },
   {
@@ -26,7 +26,7 @@
     "theoretical_speedup": 2.0,
     "dense_flops": 2097152,
     "sparse_flops": 1048576,
-    "sparse_csr_latency_ms": 0.1288920035585761,
+    "sparse_csr_latency_ms": 0.12945299968123436,
     "method_name": "Taylor Saliency"
   },
   {
@@ -41,7 +41,7 @@
     "theoretical_speedup": 4.0,
     "dense_flops": 2097152,
     "sparse_flops": 524288,
-    "sparse_csr_latency_ms": 0.08958399761468172,
+    "sparse_csr_latency_ms": 0.08884599898010492,
     "method_name": "Taylor Saliency"
   },
   {
@@ -56,7 +56,7 @@
     "theoretical_speedup": 9.99633923123856,
     "dense_flops": 2097152,
     "sparse_flops": 209792,
-    "sparse_csr_latency_ms": 0.06667600013315678,
+    "sparse_csr_latency_ms": 0.06680099759250879,
     "method_name": "Taylor Saliency"
   },
   {
@@ -71,7 +71,7 @@
     "theoretical_speedup": 19.98048780487805,
     "dense_flops": 2097152,
     "sparse_flops": 104960,
-    "sparse_csr_latency_ms": 0.06177499890327453,
+    "sparse_csr_latency_ms": 0.060250996612012386,
     "method_name": "Taylor Saliency"
   },
   {
@@ -86,7 +86,7 @@
     "theoretical_speedup": 49.951219512195124,
     "dense_flops": 2097152,
     "sparse_flops": 41984,
-    "sparse_csr_latency_ms": 0.054187001660466194,
+    "sparse_csr_latency_ms": 0.05357199814170599,
     "method_name": "Taylor Saliency"
   },
   {
@@ -101,7 +101,7 @@
     "theoretical_speedup": 1.0,
     "dense_flops": 2097152,
     "sparse_flops": 2097152,
-    "sparse_csr_latency_ms": 0.2065110020339489,
+    "sparse_csr_latency_ms": 0.2104040002450347,
     "method_name": "Magnitude Baseline"
   },
   {
@@ -116,7 +116,7 @@
     "theoretical_speedup": 2.0,
     "dense_flops": 2097152,
     "sparse_flops": 1048576,
-    "sparse_csr_latency_ms": 0.1270379964262247,
+    "sparse_csr_latency_ms": 0.12770400382578373,
     "method_name": "Magnitude Baseline"
   },
   {
@@ -131,7 +131,7 @@
     "theoretical_speedup": 4.0,
     "dense_flops": 2097152,
     "sparse_flops": 524288,
-    "sparse_csr_latency_ms": 0.0891930004581809,
+    "sparse_csr_latency_ms": 0.08934900164604187,
     "method_name": "Magnitude Baseline"
   },
   {
@@ -146,7 +146,7 @@
     "theoretical_speedup": 9.99633923123856,
     "dense_flops": 2097152,
     "sparse_flops": 209792,
-    "sparse_csr_latency_ms": 0.06761900149285793,
+    "sparse_csr_latency_ms": 0.06622600369155407,
     "method_name": "Magnitude Baseline"
   },
   {
@@ -161,7 +161,7 @@
     "theoretical_speedup": 19.98048780487805,
     "dense_flops": 2097152,
     "sparse_flops": 104960,
-    "sparse_csr_latency_ms": 0.058234999887645245,
+    "sparse_csr_latency_ms": 0.05904299672693014,
     "method_name": "Magnitude Baseline"
   },
   {
@@ -176,7 +176,7 @@
     "theoretical_speedup": 49.951219512195124,
     "dense_flops": 2097152,
     "sparse_flops": 41984,
-    "sparse_csr_latency_ms": 0.05351899657398462,
+    "sparse_csr_latency_ms": 0.06326599977910519,
     "method_name": "Magnitude Baseline"
   },
   {
@@ -191,7 +191,7 @@
     "theoretical_speedup": 1.0,
     "dense_flops": 2097152,
     "sparse_flops": 2097152,
-    "sparse_csr_latency_ms": 0.2049680007621646,
+    "sparse_csr_latency_ms": 0.20778799895197153,
     "method_name": "Taylor + Regrowth"
   },
   {
@@ -206,7 +206,7 @@
     "theoretical_speedup": 2.0,
     "dense_flops": 2097152,
     "sparse_flops": 1048576,
-    "sparse_csr_latency_ms": 0.12877900153398514,
+    "sparse_csr_latency_ms": 0.12871299870312214,
     "method_name": "Taylor + Regrowth"
   },
   {
@@ -221,7 +221,7 @@
     "theoretical_speedup": 4.0,
     "dense_flops": 2097152,
     "sparse_flops": 524288,
-    "sparse_csr_latency_ms": 0.09850599803030491,
+    "sparse_csr_latency_ms": 0.09078599978238344,
     "method_name": "Taylor + Regrowth"
   },
   {
@@ -236,7 +236,7 @@
     "theoretical_speedup": 9.99633923123856,
     "dense_flops": 2097152,
     "sparse_flops": 209792,
-    "sparse_csr_latency_ms": 0.06613099947571754,
+    "sparse_csr_latency_ms": 0.06771800108253956,
     "method_name": "Taylor + Regrowth"
   },
   {
@@ -251,7 +251,7 @@
     "theoretical_speedup": 19.98048780487805,
     "dense_flops": 2097152,
     "sparse_flops": 104960,
-    "sparse_csr_latency_ms": 0.058870003558695316,
+    "sparse_csr_latency_ms": 0.05918600130826235,
     "method_name": "Taylor + Regrowth"
   },
   {
@@ -266,7 +266,7 @@
     "theoretical_speedup": 49.951219512195124,
     "dense_flops": 2097152,
     "sparse_flops": 41984,
-    "sparse_csr_latency_ms": 0.05468300078064203,
+    "sparse_csr_latency_ms": 0.0535030011087656,
     "method_name": "Taylor + Regrowth"
   }
 ]
