@@ -3,6 +3,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![Tests Passed](https://img.shields.io/badge/tests-36%2F36%20passed-brightgreen.svg)]()
 [![Pure NumPy Autodiff](https://img.shields.io/badge/engine-pure%20numpy-orange.svg)]()
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Manojkumarmk26/aqua-self-pruning-network/blob/main/demo.ipynb)
 
 A minimal, reverse-mode automatic differentiation engine and neural network library built completely from scratch in pure Python and NumPy. Demonstrates honest dynamic parameter self-pruning during training under a hard compute budget, maintaining correctness through graph mutations, and proving measurable work reduction without overstating results.
 
