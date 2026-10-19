@@ -102,6 +102,13 @@ python experiments/part4_baseline_seeds.py --sparsity 0.95 --num_seeds 5 --epoch
 ```
 *Output Artifacts:* [`artifacts/seed_comparison.json`](file:///d:/myproject/Task/artifacts/seed_comparison.json)
 
+### 9. Launch the Interactive Client UI Dashboard (Streamlit)
+For intuitive executive presentations, live pruning simulations, weight heatmap inspection, and technical defense walkthroughs:
+```bash
+streamlit run app.py
+```
+*(Or within this project environment: `& "d:\myproject\Task\env\python.exe" -m streamlit run app.py`)*
+
 ---
 
 ## One Falsifiable Claim
